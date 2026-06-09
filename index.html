@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Certificate Generator</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        background: #f4f6f9;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: auto;
+      }
+
+      .preview {
+        background: white;
+        border-radius: 14px;
+        padding: 15px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      canvas {
+        width: 100%;
+        border-radius: 10px;
+      }
+
+      .popup {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+      }
+
+      .popup-box {
+        width: 90%;
+        max-width: 420px;
+        background: white;
+        border-radius: 18px;
+        padding: 28px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .popup-box h2 {
+        margin-bottom: 15px;
+      }
+
+      .popup-box p {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 18px;
+      }
+
+      .popup-box input {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        outline: none;
+      }
+
+      .popup-box input:focus {
+        border-color: #0b57d0;
+      }
+
+      .name {
+        min-height: 35px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #0b57d0;
+        margin-bottom: 20px;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: #0b57d0;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: #0847ad;
+      }
+
+      #successMessage {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #16a34a;
+        color: white;
+        padding: 22px 30px;
+        border-radius: 14px;
+        font-size: 20px;
+        font-weight: bold;
+        z-index: 9999;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="popup" id="popup">
+      <div class="popup-box">
+        <h2>Download Certificate</h2>
+
+        <p>Enter participant access Phone Number</p>
+
+        <input
+          type="text"
+          name="name"
+          id="phoneInput"
+          placeholder="Enter your phone number"
+          maxlength="10"
+        />
+
+        <div class="name" id="userName"></div>
+
+        <button id="downloadBtn">Download Certificate</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="preview">
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+
+    <div id="successMessage">✅ Certificate Downloaded Successfully</div>
+
+    <script>
+      /* =========================
+   PARTICIPANTS
+========================= */
+
+      const participants = {
+        7999093265: "Anjali sahu",
+        7417067930: "Md Wasim",
+        6260561024: "Chandani Thakur",
+        6370925704: "Taresh Ranjan Bhoi",
+        6263578728: "Roshani Banchhor",
+        7067866807: "Nikhil Kumar Maheshwari",
+        6261202599: "ASNA JABI",
+        6261380327: "P Meet kumar",
+        8451980575: "Abhainav Kumar",
+        7724076061: "Laxman Kumar janghel",
+        8871291203: "Sanket Thakkar",
+      };
+
+      /* =========================
+   GOOGLE SHEET WEB APP URL
+========================= */
+
+      const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbzttZ1GgElRKRiFLwDOLVuM7FO4C4Gh44kXR3gTYSsQxOW1Gx5Ig0BKLL31o1rov_YUVA/exec";
+
+      /* =========================
+   ELEMENTS
+========================= */
+
+      const canvas = document.getElementById("canvas");
+
+      const ctx = canvas.getContext("2d");
+
+      const popup = document.getElementById("popup");
+
+      const phoneInput = document.getElementById("phoneInput");
+
+      const userName = document.getElementById("userName");
+
+      const downloadBtn = document.getElementById("downloadBtn");
+
+      const successMessage = document.getElementById("successMessage");
+
+      /* =========================
+   VARIABLES
+========================= */
+
+      let currentName = "";
+
+      let certificateNumber = 201;
+
+      /* =========================
+   CERTIFICATE IMAGE
+========================= */
+
+      const baseImage = new Image();
+
+      baseImage.crossOrigin = "anonymous";
+
+      baseImage.src =
+        "https://res.cloudinary.com/dqkhxvne2/image/upload/v1780640955/PHOTO-2026-06-05-11-22-42_kbgn4e.jpg";
+
+      baseImage.onload = function () {
+        canvas.width = baseImage.width;
+
+        canvas.height = baseImage.height;
+
+        redraw();
+      };
+
+      /* =========================
+   PHONE CHECK
+========================= */
+
+      phoneInput.addEventListener("input", function () {
+        const phone = phoneInput.value.trim();
+
+        if (participants[phone]) {
+          currentName = participants[phone];
+
+          userName.innerText = currentName;
+
+          redraw();
+        } else {
+          currentName = "";
+
+          userName.innerText = "";
+
+          redraw();
+        }
+      });
+
+      /* =========================
+   CERTIFICATE ID
+========================= */
+
+      function getCertificateID() {
+        return `WED/2026/${certificateNumber}`;
+      }
+
+      /* =========================
+   FIT TEXT
+========================= */
+
+      function fitText(text, maxWidth, startSize) {
+        let size = startSize;
+
+        while (size > 10) {
+          ctx.font = `bold ${size}px serif`;
+
+          if (ctx.measureText(text).width <= maxWidth) {
+            return size;
+          }
+
+          size--;
+        }
+
+        return size;
+      }
+
+      /* =========================
+   DRAW CERTIFICATE
+========================= */
+
+      function redraw() {
+        if (!baseImage.complete) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.drawImage(baseImage, 0, 0);
+
+        if (currentName) {
+          const fontSize = fitText(currentName, canvas.width * 0.7, 50);
+
+          ctx.font = `bold ${fontSize}px serif`;
+
+          ctx.fillStyle = "#1111aa";
+
+          ctx.textAlign = "center";
+
+          ctx.textBaseline = "middle";
+
+          ctx.fillText(currentName, canvas.width * 0.51, canvas.height * 0.49);
+        }
+
+        ctx.font = "bold 30px Arial";
+
+        ctx.fillStyle = "#38b000";
+
+        ctx.textAlign = "left";
+
+        ctx.fillText(
+          getCertificateID(),
+          canvas.width * 0.52,
+          canvas.height * 0.05,
+        );
+      }
+
+      /* =========================
+   SAVE RECORD TO SHEET
+========================= */
+
+      async function saveRecord(phone, name) {
+        try {
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              phone: phone,
+              name: name,
+              time: new Date().toLocaleString(),
+            }),
+          });
+        } catch (error) {
+          console.log("Record Save Error", error);
+        }
+      }
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+      downloadBtn.addEventListener("click", async function () {
+        const phone = phoneInput.value.trim();
+
+        if (!participants[phone]) {
+          alert("Invalid phone number");
+
+          return;
+        }
+
+        const alreadyDownloaded = localStorage.getItem("downloaded_" + phone);
+
+        if (alreadyDownloaded) {
+          alert("Certificate already downloaded");
+
+          return;
+        }
+
+        redraw();
+
+        const link = document.createElement("a");
+
+        link.download = `${currentName.replace(/\s+/g, "_")}.png`;
+
+        link.href = canvas.toDataURL("image/png");
+
+        link.click();
+
+        await saveRecord(phone, currentName);
+
+        localStorage.setItem("downloaded_" + phone, "true");
+
+        popup.classList.add("hidden");
+
+        successMessage.style.display = "block";
+      });
+    </script>
+  </body>
+</html>
