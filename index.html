@@ -957,7 +957,7 @@
           ========================= */
 
             const GOOGLE_SCRIPT_URL =
-              "https://script.google.com/macros/s/AKfycbyhD4jXWHdfehENX0SCLL7qva6yvn7q3ij6_02XNbUEGYwaURt2-NMhSjV0IUPewvwhpw/exec";
+              "https://script.google.com/macros/s/AKfycbxXPjF82sPUm9Ba8OZHu0gFlqnWZ43IN8s_N5-mXB1qr8q6LzhE_E_9oj0MM0tnEbV6uQ/exec";
 
           /* =========================
              ELEMENTS
@@ -1114,7 +1114,7 @@
 
             async function saveRecord(phone, name) {
               try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                const result = await fetch(GOOGLE_SCRIPT_URL, {
                   method: "POST",
 
                   mode: "no-cors",
@@ -1125,13 +1125,12 @@
 
                   body: JSON.stringify({
                     phone: phone,
-
                     name: name,
                     certificateId : getCertificateID(),
-
                     time: new Date().toLocaleString(),
                   }),
                 });
+                console.log(result.json())
               } catch (error) {
                 console.log("Record Save Error", error);
               }
