@@ -172,11 +172,11 @@
     <div id="successMessage">✅ Certificate Downloaded Successfully</div>
 
     <script>
-            /* =========================
+      /* =========================
              ALLOWED PHONE NUMBERS
           ========================= */
 
-            const rawNumbers = `
+      const rawNumbers = `
       7999780025
       8435139876
       9399452280
@@ -943,258 +943,259 @@
       9887825970
       `;
 
-            const participants = [
-              ...new Set(
-                rawNumbers
-                  .split("\n")
-                  .map((num) => num.replace(/\D/g, "")) // remove spaces/symbols
-                  .filter((num) => num.length === 10), // only valid 10 digit numbers
-            ),
-            ];
+      const participants = [
+        ...new Set(
+          rawNumbers
+            .split("\n")
+            .map((num) => num.replace(/\D/g, "")) // remove spaces/symbols
+            .filter((num) => num.length === 10), // only valid 10 digit numbers
+        ),
+      ];
 
-            /* =========================
+      /* =========================
              GOOGLE SHEET URL
           ========================= */
 
-            const GOOGLE_SCRIPT_URL =
-              "https://script.google.com/macros/s/AKfycbxXPjF82sPUm9Ba8OZHu0gFlqnWZ43IN8s_N5-mXB1qr8q6LzhE_E_9oj0MM0tnEbV6uQ/exec";
+      const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycby46enxlML1g9Y8cdJSwsYrpOevKAfLGlqIVb15kGJd_GH_ZCAnRQ2wrA0wDGGYioqTWg/exec";
 
-          /* =========================
+      /* =========================
              ELEMENTS
           ========================= */
 
-            const canvas = document.getElementById("canvas");
-            const ctx = canvas.getContext("2d");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
 
-            const popup = document.getElementById("popup");
+      const popup = document.getElementById("popup");
 
-            const phoneInput = document.getElementById("phoneInput");
-            const nameInput = document.getElementById("nameInput");
+      const phoneInput = document.getElementById("phoneInput");
+      const nameInput = document.getElementById("nameInput");
 
-            const userName = document.getElementById("userName");
+      const userName = document.getElementById("userName");
 
-            const downloadBtn = document.getElementById("downloadBtn");
+      const downloadBtn = document.getElementById("downloadBtn");
 
-            const successMessage = document.getElementById("successMessage");
+      const successMessage = document.getElementById("successMessage");
 
-            /* =========================
+      /* =========================
              VARIABLES
           ========================= */
 
-            let currentName = "";
+      let currentName = "";
 
-            let certificateNumber = 201;
+      let certificateNumber = 201;
 
-            /* =========================
+      /* =========================
              CERTIFICATE IMAGE
           ========================= */
 
-            const baseImage = new Image();
+      const baseImage = new Image();
 
-            baseImage.crossOrigin = "anonymous";
+      baseImage.crossOrigin = "anonymous";
 
-            baseImage.src =
-              "https://res.cloudinary.com/dqkhxvne2/image/upload/v1780640955/PHOTO-2026-06-05-11-22-42_kbgn4e.jpg";
+      baseImage.src =
+        "https://res.cloudinary.com/dqkhxvne2/image/upload/v1780640955/PHOTO-2026-06-05-11-22-42_kbgn4e.jpg";
 
-            baseImage.onload = function () {
-              canvas.width = baseImage.width;
+      baseImage.onload = function () {
+        canvas.width = baseImage.width;
 
-              canvas.height = baseImage.height;
+        canvas.height = baseImage.height;
 
-              redraw();
-            };
+        redraw();
+      };
 
-            /* =========================
+      /* =========================
              PHONE CHECK
           ========================= */
 
-            phoneInput.addEventListener("input", function () {
-              const phone = phoneInput.value.trim();
+      phoneInput.addEventListener("input", function () {
+        const phone = phoneInput.value.trim();
 
-              if (participants.includes(phone)) {
-                nameInput.style.display = "block";
-              } else {
-                nameInput.style.display = "none";
+        if (participants.includes(phone)) {
+          nameInput.style.display = "block";
+        } else {
+          nameInput.style.display = "none";
 
-                nameInput.value = "";
+          nameInput.value = "";
 
-                currentName = "";
+          currentName = "";
 
-                userName.innerText = "";
+          userName.innerText = "";
 
-                redraw();
-              }
-            });
+          redraw();
+        }
+      });
 
-            /* =========================
+      /* =========================
              NAME INPUT
           ========================= */
 
-            nameInput.addEventListener("input", function () {
-              currentName = nameInput.value.trim();
+      nameInput.addEventListener("input", function () {
+        currentName = nameInput.value.trim();
 
-              userName.innerText = currentName;
+        userName.innerText = currentName;
 
-              redraw();
-            });
+        redraw();
+      });
 
-            /* =========================
+      /* =========================
              CERTIFICATE ID
           ========================= */
 
-            function getCertificateID() {
-              return `WED/2026/${certificateNumber}`;
-            }
+      function getCertificateID() {
+        return `WED/2026/${certificateNumber}`;
+      }
 
-            /* =========================
+      /* =========================
              FIT TEXT
           ========================= */
 
-            function fitText(text, maxWidth, startSize) {
-              let size = startSize;
+      function fitText(text, maxWidth, startSize) {
+        let size = startSize;
 
-              while (size > 10) {
-                ctx.font = `bold ${size}px serif`;
+        while (size > 10) {
+          ctx.font = `bold ${size}px serif`;
 
-                if (ctx.measureText(text).width <= maxWidth) {
-                  return size;
-                }
+          if (ctx.measureText(text).width <= maxWidth) {
+            return size;
+          }
 
-                size--;
-              }
+          size--;
+        }
 
-              return size;
-            }
+        return size;
+      }
 
-            /* =========================
+      /* =========================
              DRAW CERTIFICATE
           ========================= */
 
-            function redraw() {
-              if (!baseImage.complete) return;
+      function redraw() {
+        if (!baseImage.complete) return;
 
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-              ctx.drawImage(baseImage, 0, 0);
+        ctx.drawImage(baseImage, 0, 0);
 
-              /* NAME */
+        /* NAME */
 
-              if (currentName) {
-                const fontSize = fitText(currentName, canvas.width * 0.7, 50);
+        if (currentName) {
+          const fontSize = fitText(currentName, canvas.width * 0.7, 50);
 
-                ctx.font = `bold ${fontSize}px serif`;
+          ctx.font = `bold ${fontSize}px serif`;
 
-                ctx.fillStyle = "#1111aa";
+          ctx.fillStyle = "#1111aa";
 
-                ctx.textAlign = "center";
+          ctx.textAlign = "center";
 
-                ctx.textBaseline = "middle";
+          ctx.textBaseline = "middle";
 
-                ctx.fillText(currentName, canvas.width * 0.51, canvas.height * 0.49);
-              }
+          ctx.fillText(currentName, canvas.width * 0.51, canvas.height * 0.49);
+        }
 
-              /* CERTIFICATE ID */
+        /* CERTIFICATE ID */
 
-              ctx.font = "bold 30px Arial";
+        ctx.font = "bold 30px Arial";
 
-              ctx.fillStyle = "#38b000";
+        ctx.fillStyle = "#38b000";
 
-              ctx.textAlign = "left";
+        ctx.textAlign = "left";
 
-              ctx.fillText(
-                getCertificateID(),
-                canvas.width * 0.52,
-                canvas.height * 0.05,
-              );
-            }
+        ctx.fillText(
+          getCertificateID(),
+          canvas.width * 0.52,
+          canvas.height * 0.05,
+        );
+      }
 
-            /* =========================
+      /* =========================
              SAVE RECORD
           ========================= */
 
-            async function saveRecord(phone, name) {
-              try {
-                const result = await fetch(GOOGLE_SCRIPT_URL, {
-                  method: "POST",
+      async function saveRecord(phone, name) {
+        try {
+          const result = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
 
-                  mode: "no-cors",
+            mode: "no-cors",
 
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
+            headers: {
+              "Content-Type": "application/json",
+            },
 
-                  body: JSON.stringify({
-                    phone: phone,
-                    name: name,
-                    certificateId : getCertificateID(),
-                    time: new Date().toLocaleString(),
-                  }),
-                });
-                console.log(result.json())
-              } catch (error) {
-                console.log("Record Save Error", error);
-              }
-            }
+            body: JSON.stringify({
+              phone: phone,
+              name: name,
+              certificateId: getCertificateID(),
+              time: new Date().toLocaleString(),
+            }),
+          });
+          console.log(Image)
+          console.log(result.json());
+        } catch (error) {
+          console.log("Record Save Error", error);
+        }
+      }
 
-            /* =========================
+      /* =========================
              DOWNLOAD
           ========================= */
 
-            downloadBtn.addEventListener("click", async function () {
-              const phone = phoneInput.value.trim();
+      downloadBtn.addEventListener("click", async function () {
+        const phone = phoneInput.value.trim();
 
-              /* INVALID NUMBER */
+        /* INVALID NUMBER */
 
-              if (!participants.includes(phone)) {
-                alert("Invalid phone number");
+        if (!participants.includes(phone)) {
+          alert("Invalid phone number");
 
-                return;
-              }
+          return;
+        }
 
-              /* EMPTY NAME */
+        /* EMPTY NAME */
 
-              if (!currentName) {
-                alert("Please enter your name");
+        if (!currentName) {
+          alert("Please enter your name");
 
-                return;
-              }
+          return;
+        }
 
-              /* ALREADY DOWNLOADED */
+        /* ALREADY DOWNLOADED */
 
-              const alreadyDownloaded = localStorage.getItem("downloaded_" + phone);
+        const alreadyDownloaded = localStorage.getItem("downloaded_" + phone);
 
-              if (alreadyDownloaded) {
-                alert("Certificate already downloaded");
+        if (alreadyDownloaded) {
+          alert("Certificate already downloaded");
 
-                return;
-              }
+          return;
+        }
 
-              redraw();
+        redraw();
 
-              /* DOWNLOAD */
+        /* DOWNLOAD */
 
-              const link = document.createElement("a");
+        const link = document.createElement("a");
 
-              link.download = `${currentName.replace(/\s+/g, "_")}.png`;
+        link.download = `${currentName.replace(/\s+/g, "_")}.png`;
 
-              link.href = canvas.toDataURL("image/png");
+        link.href = canvas.toDataURL("image/png");
 
-              link.click();
+        link.click();
 
-              /* SAVE TO SHEET */
+        /* SAVE TO SHEET */
 
-              await saveRecord(phone, currentName);
+        await saveRecord(phone, currentName);
 
-              /* STORE */
+        /* STORE */
 
-              localStorage.setItem("downloaded_" + phone, "true");
+        localStorage.setItem("downloaded_" + phone, "true");
 
-              /* UI */
+        /* UI */
 
-              popup.classList.add("hidden");
+        popup.classList.add("hidden");
 
-              successMessage.style.display = "block";
-            });
+        successMessage.style.display = "block";
+      });
     </script>
   </body>
 </html>
