@@ -131,71 +131,158 @@
   </head>
 
   <body>
+    <!-- POPUP -->
     <div class="popup" id="popup">
       <div class="popup-box">
         <h2>Download Certificate</h2>
 
-        <p>Enter participant access Phone Number</p>
+        <p>Enter participant access phone number</p>
 
+        <!-- PHONE -->
         <input
           type="text"
-          name="name"
           id="phoneInput"
           placeholder="Enter your phone number"
           maxlength="10"
         />
 
+        <!-- NAME -->
+        <input
+          type="text"
+          id="nameInput"
+          placeholder="Enter your full name"
+          style="display: none"
+        />
+
+        <!-- LIVE NAME PREVIEW -->
         <div class="name" id="userName"></div>
 
         <button id="downloadBtn">Download Certificate</button>
       </div>
     </div>
 
+    <!-- CERTIFICATE -->
     <div class="container">
       <div class="preview">
         <canvas id="canvas"></canvas>
       </div>
     </div>
 
+    <!-- SUCCESS -->
     <div id="successMessage">✅ Certificate Downloaded Successfully</div>
 
     <script>
       /* =========================
-   PARTICIPANTS
-========================= */
+       ALLOWED PHONE NUMBERS
+    ========================= */
 
-      const participants = {
-        7999093265: "Anjali sahu",
-        7417067930: "Md Wasim",
-        6260561024: "Chandani Thakur",
-        6370925704: "Taresh Ranjan Bhoi",
-        6263578728: "Roshani Banchhor",
-        7067866807: "Nikhil Kumar Maheshwari",
-        6261202599: "ASNA JABI",
-        6261380327: "P Meet kumar",
-        8451980575: "Abhainav Kumar",
-        7724076061: "Laxman Kumar janghel",
-        8871291203: "Sanket Thakkar",
-      };
+      const rawNumbers = `
+7999780025
+8435139876
+9399452280
+9589360043
+93405 5205
+8103090836
+7974483632
+8461834503
+9109629768
+9977294242
+8839299896
+62606 53502
+9752268234
+9366154439
+8249194126
+9754482750
+7024467749
+9399104850
+9993632399
+8349410485
+6260767917
+7355440977
+8349006442
+9408644475
+8989586021
+7389500646
+7978584183
+9685201866
+9301729049
+7440684123
+7533877568
+9098267857
+7697568244
+6263892126
+8827400565
+9794669577
+8839715360
+9993866211
+9031121788
+9754469972
+6260643873
+7489266230
+8305270850
+7302851744
+6266647486
+9294754624
+7880032210
+9589776290
+9717937127
+7849099278
+9366631928
+7828891264
+8319592728
+7722991077
+8223934941
+7489175515
+6261687375
+7618366761
+9057136868
+7583867067
+8964019446
+9244831725
+6909157145
+9109450438
+9630444702
+9399372988
+8440866705
+9672954532
+9301473457
+8103573033
+9238360256
+9301462120
+6268079157
+7067930172
+7879308571
+7999441820
+8109921203
+`;
+
+      const participants = [
+        ...new Set(
+          rawNumbers
+            .split("\n")
+            .map((num) => num.replace(/\D/g, "")) // remove spaces/symbols
+            .filter((num) => num.length === 10), // only valid 10 digit numbers
+      ),
+      ];
 
       /* =========================
-   GOOGLE SHEET WEB APP URL
-========================= */
+       GOOGLE SHEET URL
+    ========================= */
 
       const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbzttZ1GgElRKRiFLwDOLVuM7FO4C4Gh44kXR3gTYSsQxOW1Gx5Ig0BKLL31o1rov_YUVA/exec";
 
       /* =========================
-   ELEMENTS
-========================= */
+       ELEMENTS
+    ========================= */
 
       const canvas = document.getElementById("canvas");
-
       const ctx = canvas.getContext("2d");
 
       const popup = document.getElementById("popup");
 
       const phoneInput = document.getElementById("phoneInput");
+      const nameInput = document.getElementById("nameInput");
 
       const userName = document.getElementById("userName");
 
@@ -204,16 +291,16 @@
       const successMessage = document.getElementById("successMessage");
 
       /* =========================
-   VARIABLES
-========================= */
+       VARIABLES
+    ========================= */
 
       let currentName = "";
 
       let certificateNumber = 201;
 
       /* =========================
-   CERTIFICATE IMAGE
-========================= */
+       CERTIFICATE IMAGE
+    ========================= */
 
       const baseImage = new Image();
 
@@ -231,19 +318,19 @@
       };
 
       /* =========================
-   PHONE CHECK
-========================= */
+       PHONE CHECK
+    ========================= */
 
       phoneInput.addEventListener("input", function () {
         const phone = phoneInput.value.trim();
 
-        if (participants[phone]) {
-          currentName = participants[phone];
-
-          userName.innerText = currentName;
-
-          redraw();
+        if (participants.includes(phone)) {
+          nameInput.style.display = "block";
         } else {
+          nameInput.style.display = "none";
+
+          nameInput.value = "";
+
           currentName = "";
 
           userName.innerText = "";
@@ -253,16 +340,28 @@
       });
 
       /* =========================
-   CERTIFICATE ID
-========================= */
+       NAME INPUT
+    ========================= */
+
+      nameInput.addEventListener("input", function () {
+        currentName = nameInput.value.trim();
+
+        userName.innerText = currentName;
+
+        redraw();
+      });
+
+      /* =========================
+       CERTIFICATE ID
+    ========================= */
 
       function getCertificateID() {
         return `WED/2026/${certificateNumber}`;
       }
 
       /* =========================
-   FIT TEXT
-========================= */
+       FIT TEXT
+    ========================= */
 
       function fitText(text, maxWidth, startSize) {
         let size = startSize;
@@ -281,8 +380,8 @@
       }
 
       /* =========================
-   DRAW CERTIFICATE
-========================= */
+       DRAW CERTIFICATE
+    ========================= */
 
       function redraw() {
         if (!baseImage.complete) return;
@@ -290,6 +389,8 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.drawImage(baseImage, 0, 0);
+
+        /* NAME */
 
         if (currentName) {
           const fontSize = fitText(currentName, canvas.width * 0.7, 50);
@@ -305,6 +406,8 @@
           ctx.fillText(currentName, canvas.width * 0.51, canvas.height * 0.49);
         }
 
+        /* CERTIFICATE ID */
+
         ctx.font = "bold 30px Arial";
 
         ctx.fillStyle = "#38b000";
@@ -319,20 +422,25 @@
       }
 
       /* =========================
-   SAVE RECORD TO SHEET
-========================= */
+       SAVE RECORD
+    ========================= */
 
       async function saveRecord(phone, name) {
         try {
           await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
+
             mode: "no-cors",
+
             headers: {
               "Content-Type": "application/json",
             },
+
             body: JSON.stringify({
               phone: phone,
+
               name: name,
+
               time: new Date().toLocaleString(),
             }),
           });
@@ -341,18 +449,30 @@
         }
       }
 
-/* =========================
-   DOWNLOAD
-========================= */
+      /* =========================
+       DOWNLOAD
+    ========================= */
 
       downloadBtn.addEventListener("click", async function () {
         const phone = phoneInput.value.trim();
 
-        if (!participants[phone]) {
+        /* INVALID NUMBER */
+
+        if (!participants.includes(phone)) {
           alert("Invalid phone number");
 
           return;
         }
+
+        /* EMPTY NAME */
+
+        if (!currentName) {
+          alert("Please enter your name");
+
+          return;
+        }
+
+        /* ALREADY DOWNLOADED */
 
         const alreadyDownloaded = localStorage.getItem("downloaded_" + phone);
 
@@ -364,6 +484,8 @@
 
         redraw();
 
+        /* DOWNLOAD */
+
         const link = document.createElement("a");
 
         link.download = `${currentName.replace(/\s+/g, "_")}.png`;
@@ -372,9 +494,15 @@
 
         link.click();
 
+        /* SAVE TO SHEET */
+
         await saveRecord(phone, currentName);
 
+        /* STORE */
+
         localStorage.setItem("downloaded_" + phone, "true");
+
+        /* UI */
 
         popup.classList.add("hidden");
 
